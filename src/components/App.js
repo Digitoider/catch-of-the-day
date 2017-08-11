@@ -21,15 +21,27 @@ class App extends React.Component {
     };
   }
 
-  componentWillMount(){ // this comes from React
+  componentWillMount(){ // comes from React
+    // this runs before the <App> is rendered
     this.ref = base.syncState(`${this.props.params.storeId}/fishes`, {
       context: this,
       state: 'fishes'
     });
+
+    const localStorageRef = localStorage.getItem(`order-${this.props.params.storeId}`);
+    if(localStorageRef){
+        this.setState({
+          order: JSON.parse(localStorageRef)
+        });
+    }
   }
 
-  componentWillUnmount() { // this comes from React
+  componentWillUnmount() { // comes from React
     base.removeBinding(this.ref);
+  }
+
+  componentWillUpdate(nextProps, nextState) { // comes from React
+    localStorage.setItem(`order-${this.props.params.storeId}`, JSON.stringify(nextState.order));
   }
 
   addFish(fish){
@@ -53,6 +65,7 @@ class App extends React.Component {
 
   render() {
     return (
+      // clumsy-adorable-mice
       <div className="catch-of-the-day">
         <div className="menu">
           <Header tagline="Fresh sea food market"/>
@@ -64,7 +77,11 @@ class App extends React.Component {
             }
           </ul>
         </div>
-        <Order fishes={this.state.fishes} order={this.state.order} />
+        <Order
+          fishes={this.state.fishes}
+          order={this.state.order}
+          params={this.props.params}
+        />
         <Inventory addFish={this.addFish} loadSamples={this.loadSamples}/>
       </div>
     );
